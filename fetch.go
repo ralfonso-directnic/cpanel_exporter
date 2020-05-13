@@ -75,19 +75,39 @@ type UapiResponse struct {
 
 func getBandwidth(user string) int{
     
-    out := cpUapi(strings.TrimSpace(user),"Bandwidth","query","grouping=protocol","interval=daily","protocols=http","timezone=America%2FChicago")
     
-    var resp UapiResponse
-    
-    
-	err := json.Unmarshal(out, &resp)
+        var bw int
+        var lines []string
+        
+        file, err := os.Open("/var/cpanel/bandwidth.cache/"+user)
+     
+    	if err != nil {
+    		log.Println("failed opening file: %s", err)
+    		return bw
+    	}
+     
+    	scanner := bufio.NewScanner(file)
+    	scanner.Split(bufio.ScanLines)
+
+    	for scanner.Scan() {
+
+    		
+    		txty := scanner.Text()
+  
+     
+            lines = append(lines,txty)
+            
+    	}
+     
+    	file.Close()
+    	
+    	out := strings.Join(lines,"\n")
+    	
+    	bw,_ := strconv.Atoi(out)
+    	
 	
-	if err != nil {
-		log.Println("error:", err)
-		return 0
-	}
-	
-    return resp.Result.Data.Http
+        return bw
+    
 }
 
 func getQuota(user string) (string,string,float64){
