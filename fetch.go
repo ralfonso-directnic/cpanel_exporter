@@ -103,7 +103,7 @@ func getBandwidth(user string) int{
     	
     	out := strings.Join(lines,"\n")
     	
-    	bw,_ := strconv.Atoi(out)
+    	bw,_ = strconv.Atoi(out)
     	
 	
         return bw
