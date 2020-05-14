@@ -9,11 +9,11 @@ import (
     "os/exec"
 	"regexp"   
 	"strings"
-	"sync"
     "io/ioutil"
     "encoding/json"
     "strconv"
     "math"
+    "github.com/remeh/sizedwaitgroup"
 )
 
 func cpanelVersion() string{
@@ -49,7 +49,7 @@ func getUsers(typ string) int{
         
     }
     
-    matches := matchFilesLine(files,"SUSPENDED=1")
+    matches := matchFilesLine(files,"SUSPENDED=1",true)
    
    return len(matches)
     
@@ -215,13 +215,13 @@ func getEmails() []string{
 
     var email []string
     
-    var wg sync.WaitGroup
+    var wg = sizedwaitgroup.New(100)
     
     files := getFilesInDir("/var/cpanel/users")
     
     for _,f := range files {
         
-        wg.Add(1)
+        wg.Add()
         
         go func(f string){
         
@@ -279,7 +279,7 @@ func getPlans() (map[string]int){
     
     files := getFilesInDir("/var/cpanel/users")
     
-    matches := matchFilesLine(files,"PLAN=.*")
+    matches := matchFilesLine(files,"PLAN=.*",true)
    
     for _,m := range matches {
          
@@ -319,6 +319,7 @@ func matchFileLine(f string,regx string) map[string]string{
     	    if(matched==true){
         	    
         	    lines[f]=txty
+        	    
     	    }
     		
     	}
@@ -331,7 +332,7 @@ func matchFileLine(f string,regx string) map[string]string{
     
 }
 
-func matchFilesLine(files []string,regx string) map[string]string{
+func matchFilesLine(files []string,regx string, stopatfirst bool) map[string]string{
     
     
      var lines = make(map[string]string)
@@ -359,6 +360,13 @@ func matchFilesLine(files []string,regx string) map[string]string{
     	    if(matched==true){
         	    
         	    lines[f]=txty
+        	    
+        	    if(stopatfirst==true){
+            	    
+            	    break
+        	    }
+        	    
+    
     	    }
     		
     	}

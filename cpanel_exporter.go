@@ -9,6 +9,7 @@ import(
     "flag"
     "path/filepath"
     "log"
+    
 
 )
 
@@ -18,6 +19,8 @@ var port string
 
 
 var (
+    interval string
+    interval_heavy string
     //reg         = prometheus.NewRegistry()
  
    // reg.MustRegister(version.NewCollector("cpanel_exporter"))
@@ -116,7 +119,14 @@ var (
 
 func fetchMetrics(){
     
-        for _ = range time.Tick(1*time.Minute) {
+    
+        dur,err := time.ParseDuration((interval+"s"))
+        
+        if(err!=nil){
+         log.Fatal(err)
+        }
+        
+        for _ = range time.Tick(dur) {
         
          runMetrics()
                
@@ -127,8 +137,13 @@ func fetchMetrics(){
 
 func fetchUapiMetrics() {
     
-    
-        for _ = range time.Tick(15*time.Minute) {
+        dur,err := time.ParseDuration((interval_heavy+"s"))
+        
+        if(err!=nil){
+         log.Fatal(err)
+        }
+        
+        for _ = range time.Tick(dur) {
         
         
          //these are heavier
@@ -205,6 +220,8 @@ func main(){
         log.SetFlags(log.LstdFlags | log.Lshortfile)
         
         flag.StringVar(&port, "port", "59117", "Metrics Port")
+        flag.StringVar(&interval, "interval","60", "Check interval duration 60s by default")
+        flag.StringVar(&interval_heavy, "interval_heavy","1800", "Bandwidth and other heavy checks interval, 1800s (30min) by default")
         flag.Parse()
         
         go runMetrics()
