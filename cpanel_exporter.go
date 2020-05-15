@@ -79,7 +79,7 @@ var (
     
     cpanelQuota = promauto.NewGaugeVec(
         		prometheus.GaugeOpts{
-        			Name: "cpanel_quota",
+        			Name: "cpanel_quota_percent",
         			Help: "cPanel Quota Percent Used",
         		},
         		[]string{"user"},
@@ -88,8 +88,8 @@ var (
     
     cpanelQuotaUsed = promauto.NewGaugeVec(
         		prometheus.GaugeOpts{
-        			Name: "cpanel_quota",
-        			Help: "cPanel Quota Percent Used",
+        			Name: "cpanel_quota_used",
+        			Help: "cPanel Quota Value Used",
         		},
         		[]string{"user"},
     )
