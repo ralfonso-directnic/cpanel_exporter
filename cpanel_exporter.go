@@ -9,7 +9,7 @@ import(
     "flag"
     "path/filepath"
     "log"
-    
+    "strconv"
 
 )
 
@@ -78,6 +78,15 @@ var (
     )
     
     cpanelQuota = promauto.NewGaugeVec(
+        		prometheus.GaugeOpts{
+        			Name: "cpanel_quota",
+        			Help: "cPanel Quota Percent Used",
+        		},
+        		[]string{"user"},
+    )
+    
+    
+    cpanelQuotaUsed = promauto.NewGaugeVec(
         		prometheus.GaugeOpts{
         			Name: "cpanel_quota",
         			Help: "cPanel Quota Percent Used",
@@ -163,9 +172,12 @@ func runUapiMetrics(){
                                            
                        cpanelBandwidth.With(prometheus.Labels{"user": us }).Set(float64(bw))
                        
-                       _,_,perc := getQuota(us)
+                       _,used,perc := getQuota(us)
                        
-                       cpanelQuota.With(prometheus.Labels{"user": us }).Set(perc)             
+                       fused,_ := strconv.ParseFloat(used,64)
+                       
+                       cpanelQuota.With(prometheus.Labels{"user": us }).Set(perc)   
+                       cpanelQuotaUsed.With(prometheus.Labels{"user": us }).Set(fused) 
       }
     
 }
